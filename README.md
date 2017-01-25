@@ -14,15 +14,10 @@ EXCLUDE+=("/run/*")
 EXCLUDE+=("/mnt/*")
 EXCLUDE+=("/media/*")
 EXCLUDE+=("/lost+found")
-EXCLUDE+=("/home/r1ft/.wine")
-EXCLUDE+=("/home/r1ft/Drive")
-EXCLUDE+=("/home/r1ft/vmware")
-EXCLUDE+=("/home/r1ft/r1ft-vault")
-EXCLUDE+=("/home/iitc/Drive")
 # ======================================
 # VARS
 # ============================
-BACKUPLOCATION=root@20.20.20.200:/mnt/Vault/Backup
+BACKUPLOCATION=user@20.20.20.20:/mnt/Vault/Backup
 BACKUPNAME=$(uname -n)
 # ===========================
 # SCRIPT
