@@ -102,11 +102,6 @@ GPGPASSWORD=$PASSWORD
 PASSWORD=""
 PASSWORD_CHECK=""
 
-#MAKE BACKUP DIR IF NOT EXISTING
-#SSHSERVER=$BACKUPLOCATION | sed 's/:.*//g'
-#SSHDIR=$BACKUPLOCATION | sed 's/.*://g'
-#ssh -q $SSHSERVER [[ ! -d $SSHDIR/$BACKUPNAME ]] && mkdir $SSHDIR/$BACKUPNAME
-
 #MAKE MOUNT FOLDER IN /tmp
 if [ ! -d "/tmp/backupmount" ]; then
 	mkdir /tmp/backupmount
@@ -238,7 +233,7 @@ cd $currentdir
 sleep 5
 fusermount -u /tmp/backupmount
 rm -rf /tmp/backupmount
-#rm /tmp/exclude_files.txt
+rm /tmp/exclude.txt
 
 #EXIT
 echo -e ${NC}"Backup Finished"
