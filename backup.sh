@@ -3,7 +3,7 @@ EXCLUDE=()
 # DEFINE EXCLUDED FILES AND FLODERS HERE
 # ======================================
 EXCLUDE+=("/dev/*")
-EXCLUDE+=("/prc/*")
+EXCLUDE+=("/proc/*")
 EXCLUDE+=("/sys/*")
 EXCLUDE+=("/tmp/*")
 EXCLUDE+=("/run/*")
@@ -24,68 +24,88 @@ BACKUPNAME=$(uname -n)
 # SCRIPT
 # ============================
 
+#COLOR CODES
+NC='\033[0m'
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+
 #CHECK UID FOR ROOT
 if [ "$EUID" -ne 0 ]; then 
-	echo "Please run as root"
+	echo -e ${RED}"Please run as root"
 	exit
 fi
+
+#PRINT HEADER
+echo -e ${NC}"rsync System Backup Script by "${BLUE}"r1ft"${NC}
+echo "====================="
 
 #CHECK DEPENDANCIES
 PACKAGEERROR=0
 echo "Checking Dependancies"
 echo "====================="
 if [ $(which rsync 2>/dev/null) ]; then
-	echo $(rsync --version | head -1)
+	echo -e ${GREEN}$(rsync --version | head -1)
 else
-	echo "rsync Not Found"
+	echo -e ${RED}"rsync Not Found"
 	PACKAGEERROR=1
 fi
 if [ $(which tar 2>/dev/null) ]; then
-	echo $(tar --version | head -1)
+	echo -e ${GREEN}$(tar --version | head -1)
 else
-	echo "tar Not Found"
+	echo -e ${RED}"tar Not Found"
 	PACKAGEERROR=1
 fi
 if [ $(which gpg 2>/dev/null) ]; then
-	echo $(gpg --version | head -1)
+	echo -e ${GREEN}$(gpg --version | head -1)
 else
-	echo "gpg Not Found"
+	echo -e ${RED}"gpg Not Found"
 	PACKAGEERROR=1
 fi
 if [ $(which pv 2>/dev/null) ]; then
-	echo $(pv --version | head -1)
+	echo -e ${GREEN}$(pv --version | head -1)
 else
-	echo "pv Not Found"
+	echo -e ${RED}"pv Not Found"
 	PACKAGEERROR=1
 fi
 if [ $(which ssh 2>/dev/null) ]; then
-	echo $(ssh -V | grep SSH)
+	echo -en ${GREEN}
+	ssh -V
 else
-	echo "ssh Not Found"
+	echo -e ${RED}"ssh Not Found"
 	PACKAGEERROR=1
 fi
+echo -e ${NC}"====================="
 if [ $PACKAGEERROR = 1 ]; then
-	echo "Dependancies Not Met"
+	echo -e ${RED}"Dependancies Not Met"
 	exit
 else
-	echo "Dependancies Installed"
+	echo -e ${GREEN}"All Dependancies Installed"
 fi
-echo -e "\n"
+echo -e ${NC}"====================="
 
 #ASK FOR GPG PASSPHRASE
 while true; do
 	read -s -p "Backup Password: " PASSWORD
-	echo -e '\n'
+	echo -e ''
 	read -s -p "Repeat Backup Password: " PASSWORD_CHECK
+	echo -e ''
 	if [ $PASSWORD = $PASSWORD_CHECK ]; then
 		break
 	else
-		echo -e "\nPassword Did Not Match"
+		echo -e ${RED}"Password Did Not Match"
+		echo -en ${NC}
 	fi		
 done
+echo "Starting Backup ..."
 GPGPASSWORD=$PASSWORD
 PASSWORD=""
 PASSWORD_CHECK=""
+
+#MAKE BACKUP DIR IF NOT EXISTING
+#SSHSERVER=$BACKUPLOCATION | sed 's/:.*//g'
+#SSHDIR=$BACKUPLOCATION | sed 's/.*://g'
+#ssh -q $SSHSERVER [[ ! -d $SSHDIR/$BACKUPNAME ]] && mkdir $SSHDIR/$BACKUPNAME
 
 #MAKE MOUNT FOLDER IN /tmp
 if [ ! -d "/tmp/backupmount" ]; then
@@ -105,27 +125,30 @@ currentdir=$(pwd)
 cd /tmp/backupmount
 
 #BUILD EXLUDE FILE
-if [ -f /tmp/exclude_files.txt ]; then
-	rm /tmp/exclude_files.txt
+if [ -f /tmp/exclude.txt ]; then
+	rm /tmp/exclude.txt
 fi
 for i in ${!EXCLUDE[*]}
 do
-	echo "${EXCLUDE[$i]}" >> /tmp/exclude_files.txt
+	echo "${EXCLUDE[$i]}" >> /tmp/exclude.txt
 done
 
 #COUNT FILES TO BACKUP
-FCNT=$(rsync -r --dry-run --stats --human-readable --exclude-from='/tmp/exclude_files.txt' / $BACKUPNAME | grep 'Number of files:' | sed 's/(.*//' | sed 's/ //g' | sed 's/,//g' | sed 's/.*://g')
+echo -en ${GREEN}
+FCNT=$(rsync -r --dry-run --stats --human-readable --exclude-from='/tmp/exclude.txt' -e ssh / $BACKUPLOCATION/$BACKUPNAME | grep 'Number of files:' | sed 's/(.*//' | sed 's/ //g' | sed 's/,//g' | sed 's/.*://g')
 
 #BACKUP TO FOLDER ON SFTP
-rsync -aAXviO --stats --human-readable --exclude=$EXCLUDESTRING / $BACKUPNAME | pv -lep -s $FCNT >/dev/null 
+rsync -aAXviO --stats --human-readable --exclude-from='/tmp/exclude.txt' -e ssh / $BACKUPLOCATION/$BACKUPNAME | pv -lepb -s $FCNT >/dev/null 
 
 #TAR FILES ON SFTP
-tar -vz -cf $BACKUPNAME.tar.gz $BACKUPNAME
+echo -e ${NC}"Making tar of Backup ..."${GREEN}
+tar -vz -cf $BACKUPNAME.tar.gz $BACKUPNAME | pv -lepb -s $FCNT >/devnull
 
 #REMOVE BACKUP FILES
 rm -rf $BACKUPNAME/
 
 #ENCRYPT TAR
+echo -e ${NC}"Encrypting tar ..."${GREEN}
 echo $GPGPASSWORD | gpg --batch --passphrase-fd 0 -c -o $BACKUPNAME.gpg $BACKUPNAME.tar.gz
 GPGPASSWORD=""
 
@@ -207,8 +230,8 @@ cd $currentdir
 sleep 5
 fusermount -u /tmp/backupmount
 rm -rf /tmp/backupmount
-rm /tmp/exclude_files.txt
+#rm /tmp/exclude_files.txt
 
 #EXIT
-ECHO "Backup Finished"
+echo -e ${NC}"Backup Finished"
 exit 0
