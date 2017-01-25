@@ -1,7 +1,7 @@
 # rsync-bash-script
 Rsync Bash Script for backing up arch linux with a gpg encrypted container
 
-#!/bin/bash
+```#!/bin/bash
 EXCLUDE=()
 # DEFINE EXCLUDED FILES AND FLODERS HERE
 # ======================================
@@ -238,4 +238,4 @@ rm /tmp/exclude.txt
 
 #EXIT
 echo -e ${NC}"Backup Finished"
-exit 0
+exit 0```
