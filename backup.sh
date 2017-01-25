@@ -164,45 +164,53 @@ echo $RESTORESTRING >> $BACKUPNAME-recover.sh
 echo $RESTORELOCATIONSTRING >> $BACKUPNAME-recover.sh
 echo -e '\n' >> $BACKUPNAME-recover.sh
 echo -e "read -s -p \"Backup Password: \" GPGPASSWORD
+#COLOR CODES
+NC='\\033[0m'
+RED='\\033[0;31m'
+GREEN='\\033[0;32m'
+BLUE='\\033[0;34m'
+
 if [ \"\$EUID\" -ne 0 ]; then 
-	\"Please run as root\"
+	echo -e \${RED}\"Please run as root\"
 	exit
 fi
 PACKAGEERROR=0
+
 echo \"Checking Dependancies\"
 echo \"=====================\"
 if [ \$(which rsync 2>/dev/null) ]; then
-	echo \$(rsync --version | head -1)
+	echo -e \${GREEN}\$(rsync --version | head -1)
 else
-	echo \"rsync not found\"
+	echo -e \${RED}\"rsync not found\"
 	PACKAGEERROR=1
 fi
 if [ \$(which tar 2>/dev/null) ]; then
-	echo \$(tar --version | head -1)
+	echo -e \${GREEN}\$(tar --version | head -1)
 else
-	echo \"tar not found\"
+	echo -e \{RED}\"tar not found\"
 	PACKAGEERROR=1
 fi
 if [ \$(which gpg 2>/dev/null) ]; then
-	echo \$(gpg --version | head -1)
+	echo -e \${GREEN}\$(gpg --version | head -1)
 else
-	echo \"gpg not found\"
+	echo -e \${RED}\"gpg not found\"
 	PACKAGEERROR=1
 fi
 if [ \$(which pv 2>/dev/null) ]; then
-	echo \$(pv --version | head -1)
+	echo -e \${GREEN}\$(pv --version | head -1)
 else
-	echo \"pv not found\"
+	echo -e \${RED}\"pv not found\"
 	PACKAGEERROR=1
 fi
 if [ \$(which ssh 2>/dev/null) ]; then
-	echo \$(ssh -V)
+	echo -en \${GREEN}
+	ssh -V
 else
-	echo \"ssh not found\"
+	echo -e \${RED}\"ssh not found\"
 	PACKAGEERROR=1
 fi
 if [ \$PACKAGEERROR = 1 ]; then
-	echo \"Dependances not met\"
+	echo -e \${RED}\"Dependances not met\"\${NC}
 	exit
 fi
 if [ ! -d \"/tmp/restore\" ]; then
