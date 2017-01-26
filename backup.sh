@@ -10,15 +10,10 @@ EXCLUDE+=("/run/*")
 EXCLUDE+=("/mnt/*")
 EXCLUDE+=("/media/*")
 EXCLUDE+=("/lost+found")
-EXCLUDE+=("/home/r1ft/.wine")
-EXCLUDE+=("/home/r1ft/Drive")
-EXCLUDE+=("/home/r1ft/vmware")
-EXCLUDE+=("/home/r1ft/r1ft-vault")
-EXCLUDE+=("/home/iitc/Drive")
 # ======================================
 # VARS
 # ============================
-BACKUPLOCATION=root@20.20.20.200:/mnt/Vault/Backup
+BACKUPLOCATION=user@127.0.0.1:/backuplocation/folder/folder
 BACKUPNAME=$(uname -n)
 # ===========================
 # SCRIPT
@@ -129,21 +124,20 @@ do
 done
 
 #COUNT FILES TO BACKUP
-echo -en ${GREEN}
 FCNT=$(rsync -r --dry-run --stats --human-readable --exclude-from='/tmp/exclude.txt' -e ssh / $BACKUPLOCATION/$BACKUPNAME | grep 'Number of files:' | sed 's/(.*//' | sed 's/ //g' | sed 's/,//g' | sed 's/.*://g')
 
 #BACKUP TO FOLDER ON SFTP
 rsync -aAXviO --stats --human-readable --exclude-from='/tmp/exclude.txt' -e ssh / $BACKUPLOCATION/$BACKUPNAME | pv -lepb -s $FCNT >/dev/null 
 
 #TAR FILES ON SFTP
-echo -e ${NC}"Making tar of Backup ..."${GREEN}
+echo -e ${NC}"Making tar of Backup ..."
 tar -vz -cf $BACKUPNAME.tar.gz $BACKUPNAME | pv -lepb -s $FCNT >/devnull
 
 #REMOVE BACKUP FILES
 rm -rf $BACKUPNAME/
 
 #ENCRYPT TAR
-echo -e ${NC}"Encrypting tar ..."${GREEN}
+echo -e ${NC}"Encrypting tar ..."
 echo $GPGPASSWORD | gpg --batch --passphrase-fd 0 -c -o $BACKUPNAME.gpg $BACKUPNAME.tar.gz
 GPGPASSWORD=""
 
