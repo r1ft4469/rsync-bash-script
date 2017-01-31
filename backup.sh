@@ -27,12 +27,12 @@ BLUE='\033[0;34m'
 
 #CHECK UID FOR ROOT
 if [ "$EUID" -ne 0 ]; then 
-	echo -e ${RED}"Please run as root"
+	echo -e ${RED}"Please run as root"${NC}
 	exit
 fi
 
 #PRINT HEADER
-echo -e ${NC}"rsync System Backup Script by "${BLUE}"r1ft"${NC}
+echo -e ${NC}"rsync System Backup Script by r1ft"
 echo "====================="
 
 #CHECK DEPENDANCIES
@@ -40,34 +40,33 @@ PACKAGEERROR=0
 echo "Checking Dependancies"
 echo "====================="
 if [ $(which rsync 2>/dev/null) ]; then
-	echo -e ${GREEN}$(rsync --version | head -1)
+	echo -e "["${GREEN}"✔"${NC}"] rsync"
 else
-	echo -e ${RED}"rsync Not Found"
+	echo -e r"["${RED}"✘"${NC}"] rsync"
 	PACKAGEERROR=1
 fi
 if [ $(which tar 2>/dev/null) ]; then
-	echo -e ${GREEN}$(tar --version | head -1)
+	echo -e "["${GREEN}"✔"${NC}"] tar"
 else
-	echo -e ${RED}"tar Not Found"
+	echo -e "["${RED}"✘"${NC}"] tar"
 	PACKAGEERROR=1
 fi
 if [ $(which gpg 2>/dev/null) ]; then
-	echo -e ${GREEN}$(gpg --version | head -1)
+	echo -e "["${GREEN}"✔"${NC}"] gpg"
 else
-	echo -e ${RED}"gpg Not Found"
+	echo -e "["${RED}"✘"${NC}"] gpg"
 	PACKAGEERROR=1
 fi
 if [ $(which pv 2>/dev/null) ]; then
-	echo -e ${GREEN}$(pv --version | head -1)
+	echo -e "["${GREEN}"✔"${NC}"] pv"
 else
-	echo -e ${RED}"pv Not Found"
+	echo -e "["${RED}"✘"${NC}"] pv"
 	PACKAGEERROR=1
 fi
 if [ $(which ssh 2>/dev/null) ]; then
-	echo -en ${GREEN}
-	ssh -V
+	echo -e "["${GREEN}"✔"${NC}"] ssh"
 else
-	echo -e ${RED}"ssh Not Found"
+	echo -e "["${RED}"✘"${NC}"] ssh"
 	PACKAGEERROR=1
 fi
 echo -e ${NC}"====================="
@@ -168,40 +167,43 @@ PACKAGEERROR=0
 echo \"Checking Dependancies\"
 echo \"=====================\"
 if [ \$(which rsync 2>/dev/null) ]; then
-	echo -e \${GREEN}\$(rsync --version | head -1)
+	echo -e \"[\"\${GREEN}\"✔\"\${NC}\"] rsync\"
 else
-	echo -e \${RED}\"rsync not found\"
+	echo -e r\"[\"\${RED}\"✘\"\${NC}\"] rsync\"
 	PACKAGEERROR=1
 fi
 if [ \$(which tar 2>/dev/null) ]; then
-	echo -e \${GREEN}\$(tar --version | head -1)
+	echo -e \"[\"\${GREEN}\"✔\"\${NC}\"] tar\"
 else
-	echo -e \{RED}\"tar not found\"
+	echo -e \"[\"\${RED}\"✘\"\${NC}\"] tar\"
 	PACKAGEERROR=1
 fi
 if [ \$(which gpg 2>/dev/null) ]; then
-	echo -e \${GREEN}\$(gpg --version | head -1)
+	echo -e \"[\"\${GREEN}\"✔\"\${NC}\"] gpg\"
 else
-	echo -e \${RED}\"gpg not found\"
+	echo -e \"[\"\${RED}\"✘\"\${NC}\"] gpg\"
 	PACKAGEERROR=1
 fi
 if [ \$(which pv 2>/dev/null) ]; then
-	echo -e \${GREEN}\$(pv --version | head -1)
+	echo -e \"[\"\${GREEN}\"✔\"\${NC}\"] pv\"
 else
-	echo -e \${RED}\"pv not found\"
+	echo -e \"[\"\${RED}\"✘\"\${NC}\"] pv\"
 	PACKAGEERROR=1
 fi
 if [ \$(which ssh 2>/dev/null) ]; then
-	echo -en \${GREEN}
-	ssh -V
+	echo -e \"[\"\${GREEN}\"✔\"\${NC}\"] ssh\"
 else
-	echo -e \${RED}\"ssh not found\"
+	echo -e \"[\"\${RED}\"✘\"\${NC}\"] ssh\"
 	PACKAGEERROR=1
 fi
+echo -e \${NC}\"=====================\"
 if [ \$PACKAGEERROR = 1 ]; then
-	echo -e \${RED}\"Dependances not met\"\${NC}
+	echo -e \${RED}\"Dependancies Not Met\"
 	exit
+else
+	echo -e \${GREEN}\"All Dependancies Installed\"
 fi
+echo -e \${NC}\"=====================\"
 if [ ! -d \"/tmp/restore\" ]; then
 	mkdir /tmp/restore
 fi
